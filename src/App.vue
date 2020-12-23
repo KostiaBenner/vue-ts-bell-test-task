@@ -1,10 +1,25 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div id="app">
+    <div id="nav">
+      <router-link to="/">Список</router-link> |
+      <router-link to="/history">История</router-link> |
+      <router-link to="/history/selected">История добавлений</router-link> |
+      <router-link to="/history/removed">История удалений</router-link>
+    </div>
+    <router-view/>
   </div>
-  <router-view/>
 </template>
+
+<script lang="ts">
+import { defineComponent, PropType } from "vue"
+import store from "@/store"
+
+export default defineComponent({
+  created(): void {
+    store.dispatch('fetchData')
+  }
+})
+</script>
 
 <style lang="scss">
 #app {

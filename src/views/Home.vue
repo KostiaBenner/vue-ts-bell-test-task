@@ -5,96 +5,38 @@
         <div class="listing-search">
           <input v-model="search" placeholder="Поиск" type="text" class="listing-search__input">
         </div>
-        <div class="listing-item" v-for="(item, index) in items" :key="index">
-          <span>
-            {{ item.name }}
-            <span v-if="item.countItems">({{ item.countItems || 0 }})</span>
-          </span>
-          <span class="listing-item__subitems">{{ item.items.map(i => i.name).join(', ') }}</span>
-          <span @click="addToSelected(item)" class="listing-item__btn-add">+</span>
-        </div>
+        <ListItem v-if="items.length" v-for="(item, index) in items" :key="index" :item="item"/>
+        <h3 v-if="!items.length">Ничего не найдено</h3>
       </div>
       <div class="listing__column">
-        <div class="listing-item listing-item_mod_removed" v-for="(item, index) in selected" :key="index">
-          <span @click="removeFromSelected(item)" class="listing-item__btn-remove">-</span>
-          <span>{{ item.name }}</span>
-          <span class="listing-item__subitems">{{ item.items.map(i => i.name).join(', ') }}</span>
-        </div>
+        <ListItem v-if="selected.length" v-for="(item, index) in selected" selected :key="index" :item="item"/>
+        <h3 v-else>Ничего не выбрано</h3>
       </div>
-
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { mapActions } from 'vuex'
 import ItemInterface from '@/types/item'
 import store from "@/store"
-import {defineComponent} from "vue";
+import {defineComponent, ref, computed} from "vue";
+import ListItem from "@/components/ListItem.vue";
 
 export default defineComponent({
+  components: {ListItem},
 
-  data() {
+  setup() {
+    let search = ref<string>('')
+
+    let selected = computed<ItemInterface[]>(() => store.getters.getSelectedItems())
+    let items = computed<ItemInterface[]>(() => store.getters.getItemsBySearchWithoutSelected(search.value))
+
     return {
-      search: '' as string,
+      search,
+      selected,
+      items
     }
   },
-
-  computed: {
-
-    selected(): ItemInterface[] {
-      const selectedArr: any[] = store.state.selected
-      return store.state.items.filter((item: ItemInterface) => {
-        return selectedArr.indexOf(item.id) !== -1
-      })
-    },
-
-    items(): ItemInterface[] {
-
-      const search: string = this.search;
-      const selectedArr: any[] = store.state.selected
-
-      let elems: ItemInterface[] = store.state.items.filter((item: ItemInterface) => selectedArr.indexOf(item.id) == -1)
-
-      if (search) {
-        elems = elems
-            
-          .map((item: any) => {
-            const countItems: number = item.name.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1 ? 1 : 0
-            const newItem: ItemInterface = {
-              ...item,
-              countItems: countItems
-            }
-            return newItem;
-          })
-
-          // Подсчет вхождений дочерних элементов при поиске
-          .map((item: any) => {
-            return {
-              ...item,
-              countItems: item.countItems + item.items.filter((el: any) => {
-                return el.name.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
-              }).length
-            }
-          })
-
-          // Вывод только тех которые подходят под условия поиска либо есть совпадения по дочерним
-          .filter((item: any) => {
-            return item.countItems > 0 || item.name.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
-          })
-
-          // Сортировка по найденым вхождениям
-          .sort((a, b) => b.countItems - a.countItems);
-
-      }
-
-      return elems
-    }
-  },
-
-  methods: {
-    ...mapActions(['addToSelected', 'removeFromSelected']),
-  }
 })
 </script>
 
@@ -111,51 +53,11 @@ export default defineComponent({
     flex: 0 0 calc(50% - 40px);
   }
 
-  &-item, &-search {
+  &-search {
     padding: 15px;
     border-bottom: 1px solid #EEE;
     text-align: left;
     box-sizing: border-box;
-  }
-
-  &-item {
-    position: relative;
-
-    &_mod_removed {
-      padding-left: 45px;
-    }
-
-    &__subitems {
-      font-size: 12px;
-      margin-left: 12px;
-      color: #DDD;
-    }
-
-    &__btn-add, &__btn-remove {
-      width: 25px;
-      height: 25px;
-      font-weight: bold;
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-radius: 5px;
-      background: #DDD;
-      opacity: 0.5;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      line-height: normal;
-      &:hover {
-        cursor: pointer;
-        opacity: 0.8;
-      }
-    }
-
-    &__btn-remove {
-      left: 10px;
-    }
-
   }
 
   &-search {

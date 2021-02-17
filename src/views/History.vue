@@ -8,13 +8,20 @@
 import store from "@/store"
 import {defineComponent} from "vue";
 import HistoryInterface from "../types/history";
-import HistoryItem from "@/components/HistoryItem.vue";
+import HistoryItem from "@/components/history_item/HistoryItem.vue";
 
 export default defineComponent({
   components: {HistoryItem},
+
+  props: {
+    historyType: {
+      default: null
+    },
+  },
+
   computed: {
     items(): HistoryInterface[] {
-      return store.state.history
+      return store.getters.getHistoryItems(this.historyType)
     },
   }
 })

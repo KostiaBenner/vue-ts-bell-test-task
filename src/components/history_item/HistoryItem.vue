@@ -3,29 +3,35 @@
 
     <div class="history-item__title">{{ item.item.name }} <span class="history-item__id">{{ item.item.id }}</span></div>
 
-    <span class="history-item__action" :class="{'history-item__action_mod_add': item.action === 'add'}">
-        {{ item.action === 'add' ? 'добавлен в список':'удален из списка' }} {{createdString(item.created)}}
+    <span class="history-item__action" :class="{'history-item__action_mod_add': item.action === HistoryActionTypes.ADD_ACTION}">
+        {{ item.action === HistoryActionTypes.ADD_ACTION ? 'добавлен в список':'удален из списка' }} {{ createdString(item.created) }}
     </span>
 
   </div>
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from "vue";
-import HistoryInterface from "../types/history";
-import moment from 'moment';
+import {computed, defineComponent, toRefs, PropType} from "vue";
+import HistoryInterface from "@/types/history";
+import {HistoryActionTypes} from "@/types/history-action-types";
 
 export default defineComponent({
   name: "HistoryItem",
   props: {
     item: {
-      type: Object as PropType<HistoryInterface>,
+      type: Object as () => HistoryInterface,
       required: true
+    }
+  },
+
+  data() {
+    return {
+      HistoryActionTypes
     }
   },
   methods: {
     createdString(date: string): string {
-      return moment(date).format('DD.MM.YYYY, HH:mm')
+      return new Date(date).toLocaleString()
     }
   }
 })

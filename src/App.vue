@@ -1,10 +1,29 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Список</router-link> |
-      <router-link to="/history">История</router-link> |
-      <router-link to="/history/selected">История добавлений</router-link> |
-      <router-link to="/history/removed">История удалений</router-link>
+      <router-link :to="{name: 'Home'}">
+        Список
+      </router-link> |
+      <router-link
+          :disabled="!totalCount"
+          :event="totalCount ? 'click' : ''"
+          :to="{name: 'History'}">
+        История
+      </router-link> |
+      <router-link
+          :disabled="!selectedCount"
+          :event="selectedCount ? 'click' : ''"
+          :to="{name: 'HistorySelected'}"
+      >
+        История добавлений ({{ selectedCount }})
+      </router-link> |
+      <router-link
+          :disabled="!removedCount"
+          :event="removedCount ? 'click' : ''"
+          :to="{name: 'HistoryRemoved'}"
+      >
+        История удалений ({{ removedCount }})
+      </router-link>
     </div>
     <router-view/>
   </div>
@@ -13,10 +32,23 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import store from "@/store"
+import {ActionTypes} from "@/types/action-types";
+import {HistoryActionTypes} from "@/types/history-action-types";
 
 export default defineComponent({
   created(): void {
-    store.dispatch('fetchData')
+    store.dispatch(ActionTypes.FETCH_DATA)
+  },
+  computed: {
+    totalCount() {
+      return store.getters.getHistoryItems().length
+    },
+    selectedCount() {
+      return store.getters.getHistoryItems(HistoryActionTypes.ADD_ACTION).length
+    },
+    removedCount() {
+      return store.getters.getHistoryItems(HistoryActionTypes.REMOVE_ACTION).length
+    }
   }
 })
 </script>

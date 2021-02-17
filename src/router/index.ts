@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import {HistoryActionTypes} from "@/types/history-action-types";
+
 import Home from '../views/Home.vue'
+const History = import(/* webpackChunkName: "History" */ '../views/History.vue')
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,17 +13,19 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/history',
     name: 'History',
-    component: () => import(/* webpackChunkName: "about" */ '../views/History.vue')
+    component: () => History
   },
   {
     path: '/history/selected',
     name: 'HistorySelected',
-    component: () => import(/* webpackChunkName: "about" */ '../views/HistorySelected.vue')
+    component: () => History,
+    props: { historyType: HistoryActionTypes.ADD_ACTION }
   },
   {
     path: '/history/removed',
     name: 'HistoryRemoved',
-    component: () => import(/* webpackChunkName: "about" */ '../views/HistoryRemoved.vue')
+    component: () => History,
+    props: { historyType: HistoryActionTypes.REMOVE_ACTION }
   }
 ]
 
